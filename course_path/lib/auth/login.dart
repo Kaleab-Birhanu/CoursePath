@@ -64,8 +64,10 @@ class _LoginState extends State<Login> {
   Widget inputField({
     required String hint,
     required IconData icon,
-    bool isPassword = false,
-    required TextEditingController controller,
+    bool isPassword =
+        false, // Default to false since most fields aren't password fields
+    required TextEditingController
+    controller, // Controller manages the text input state and value
     required bool isDark,
   }) {
     return TextField(
@@ -98,13 +100,16 @@ class _LoginState extends State<Login> {
 
   // ---------------- LOGIN ----------------
   Future<void> login() async {
+    // Validate role selection
     if (selectedRole == null) {
       ScaffoldMessenger.of(
+        // .of() gets the nearest ScaffoldMessenger in widget tree
         context,
       ).showSnackBar(const SnackBar(content: Text('Please select a role')));
       return;
     }
 
+    // Validate input fields
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
@@ -115,16 +120,19 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    setState(() => isLoading = true);
+    setState(() => isLoading = true); // Updates UI to show loading spinner
 
     try {
-      // ---------------- FIREBASE AUTH ----------------
+      // Firebase authentication
       final userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       final user = userCredential.user;
 
+      // Handle student login
       if (user != null && selectedRole == 'Student') {
-        final docRef = FirebaseFirestore.instance
+        // Get or create student document
+        final docRef = FirebaseFirestore
+            .instance // docRef = document reference to Firestore document
             .collection('students')
             .doc(user.uid);
         final doc = await docRef.get();
@@ -133,27 +141,23 @@ class _LoginState extends State<Login> {
         String studentID = '';
 
         if (!doc.exists) {
-          // Pre-fill sample students
+          // Pre-populate sample student data
           if (user.email == 'alex@student.edu') {
             name = 'Alex Thompson';
             studentID = 'ETS1234/15';
           } else if (user.email == 'maya@student.edu') {
             name = 'Maya Johnson';
             studentID = 'ETS1235/16';
-          } else if (user.email == 'david@student.edu') {
-            name = 'David Smith';
-            studentID = 'ETS1236/17';
-          } else {
-            name = 'Unknown Student';
-            studentID = 'Unknown ID';
-          }
+          } // Pre-populate demo data for specific test accounts
 
+          // Create student document
           await docRef.set({
             'name': name,
             'studentID': studentID,
             'email': user.email,
           });
         } else {
+          // Load existing student data
           final data = doc.data()!;
           name = data['name'] ?? 'Unknown Student';
           studentID = data['studentID'] ?? 'Unknown ID';
@@ -161,6 +165,7 @@ class _LoginState extends State<Login> {
 
         // Navigate to student dashboard
         if (mounted) {
+          // mounted checks if widget is still in widget tree (prevents errors)
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -169,8 +174,8 @@ class _LoginState extends State<Login> {
             ),
           );
         }
-      } else if (user != null && selectedRole!.toLowerCase() == 'admin') {
-        // ---------------- ADMIN ----------------
+      } else if (user != null && selectedRole == 'Admin') {
+        // Handle admin login
         final docRef = FirebaseFirestore.instance
             .collection('admins')
             .doc(user.uid);
@@ -180,7 +185,7 @@ class _LoginState extends State<Login> {
         String adminEmail = user.email ?? '';
 
         if (!doc.exists) {
-          // Pre-fill sample admins
+          // Pre-populate sample admin data
           if (adminEmail == 'john@admin.edu') {
             adminName = 'Prof. John Carter';
           } else if (adminEmail == 'linda@admin.edu') {
@@ -191,8 +196,10 @@ class _LoginState extends State<Login> {
             adminName = 'Unknown Admin';
           }
 
+          // Create admin document
           await docRef.set({'name': adminName, 'email': adminEmail});
         } else {
+          // Load existing admin data
           final data = doc.data()!;
           adminName = data['name'] ?? 'Unknown Admin';
         }
@@ -209,9 +216,9 @@ class _LoginState extends State<Login> {
         }
       }
     } on FirebaseAuthException catch (e) {
+      // Handle Firebase authentication errors
       String errorMessage = 'Login failed';
 
-      // Handle specific Firebase Auth error codes
       if (e.code == 'user-not-found' ||
           e.code == 'wrong-password' ||
           e.code == 'invalid-credential' ||
@@ -229,6 +236,7 @@ class _LoginState extends State<Login> {
         ).showSnackBar(SnackBar(content: Text(errorMessage)));
       }
     } catch (e) {
+      // Handle unexpected errors
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('An unexpected error occurred')),
@@ -278,28 +286,36 @@ class _LoginState extends State<Login> {
                 ),
               ),
               const SizedBox(height: 24),
-              roleCard(
-                title: 'Student',
-                icon: Icons.school,
-                selected: selectedRole == 'Student',
-                onTap: () {
-                  setState(() {
-                    selectedRole = 'Student';
-                  });
-                },
-                isDark: isDark,
-              ),
-              const SizedBox(height: 12),
-              roleCard(
-                title: 'Admin',
-                icon: Icons.admin_panel_settings,
-                selected: selectedRole?.toLowerCase() == 'admin',
-                onTap: () {
-                  setState(() {
-                    selectedRole = 'admin';
-                  });
-                },
-                isDark: isDark,
+              Row(
+                children: [
+                  Expanded(
+                    child: roleCard(
+                      title: 'Student',
+                      icon: Icons.school,
+                      selected: selectedRole == 'Student',
+                      onTap: () {
+                        setState(() {
+                          selectedRole = 'Student';
+                        });
+                      },
+                      isDark: isDark,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: roleCard(
+                      title: 'Admin',
+                      icon: Icons.admin_panel_settings,
+                      selected: selectedRole == 'Admin',
+                      onTap: () {
+                        setState(() {
+                          selectedRole = 'Admin';
+                        });
+                      },
+                      isDark: isDark,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               inputField(
