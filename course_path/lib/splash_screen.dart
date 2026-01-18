@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'auth/login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,6 +15,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
+    // Test Firebase connection
+    testFirebaseConnection();
+
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -22,13 +27,31 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-@override
+  // ---------------- TEST FIREBASE ----------------
+  void testFirebaseConnection() async {
+    try {
+      // Test Firebase Auth
+      final currentUser = FirebaseAuth.instance.currentUser;
+      print('Firebase Auth initialized! Current user: $currentUser');
+
+      // Test Firestore
+      final snapshot = await FirebaseFirestore.instance
+          .collection('students')
+          .limit(1)
+          .get();
+      print('Firestore connected! Found ${snapshot.docs.length} student documents');
+    } catch (e) {
+      print('Firebase connection failed: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -43,15 +66,14 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Container(
                 width: 110,
                 height: 110,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  ),
+                ),
                 alignment: Alignment.center,
                 child: const Text(
                   'CP',
                   style: TextStyle(
-                    fontSize: 50,
+                    fontSize: 70,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF5865F2),
                   ),
@@ -60,9 +82,9 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Course Path',
+              'CoursePath',
               style: TextStyle(
-                fontSize: 38,
+                fontSize: 50,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -70,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 8),
             const Text(
               'Smart Course Planning',
-              style: TextStyle(fontSize: 14, color: Colors.white),
+              style: TextStyle(fontSize: 24, color: Colors.white),
             ),
           ],
         ),
