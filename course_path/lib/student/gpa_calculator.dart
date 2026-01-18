@@ -50,7 +50,6 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
       courseName: _courseNameController.text.trim(),
       grade: _selectedGrade,
       credits: int.parse(_creditsController.text.trim()),
-      semester: '',
     );
 
     await FirebaseFirestore.instance
@@ -159,7 +158,7 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
                       child: Column(
                         children: [
                           const Text(
-                            'Current GPA',
+                            'GPA',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 18,
@@ -509,7 +508,6 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
               courseName: _courseNameController.text.trim(),
               grade: _selectedGrade,
               credits: int.parse(_creditsController.text.trim()),
-              semester: '',
             );
 
             if (isEdit && gradeId != null && userId != null) {
@@ -545,7 +543,6 @@ class _GPACalculatorScreenState extends State<GPACalculatorScreen> {
       courseName: '',
       grade: grade,
       credits: 0,
-      semester: '',
     ).gradePoint;
 
     if (point >= 3.7) return Colors.green;
