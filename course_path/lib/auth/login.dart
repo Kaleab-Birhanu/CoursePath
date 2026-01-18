@@ -209,16 +209,31 @@ class _LoginState extends State<Login> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      print('FirebaseAuth error code: ${e.code}');
-      print('FirebaseAuth error message: ${e.message}');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+      String errorMessage = 'Login failed';
+
+      // Handle specific Firebase Auth error codes
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential' ||
+          e.code == 'invalid-email') {
+        errorMessage = 'Incorrect email or password';
+      } else if (e.code == 'user-disabled') {
+        errorMessage = 'This account has been disabled';
+      } else if (e.code == 'too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
     } catch (e) {
-      print('Unexpected error: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An unexpected error occurred')),
+        );
+      }
     } finally {
       setState(() => isLoading = false);
     }
