@@ -141,14 +141,9 @@ class _LoginState extends State<Login> {
         String studentID = '';
 
         if (!doc.exists) {
-          // Pre-populate sample student data
-          if (user.email == 'alex@student.edu') {
-            name = 'Alex Thompson';
-            studentID = 'ETS1234/15';
-          } else if (user.email == 'maya@student.edu') {
-            name = 'Maya Johnson';
-            studentID = 'ETS1235/16';
-          } // Pre-populate demo data for specific test accounts
+          // For new users, use default values - they can update later
+          name = 'New Student';
+          studentID = 'ID_PENDING';
 
           // Create student document
           await docRef.set({
@@ -165,7 +160,6 @@ class _LoginState extends State<Login> {
 
         // Navigate to student dashboard
         if (mounted) {
-          // mounted checks if widget is still in widget tree (prevents errors)
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -185,16 +179,7 @@ class _LoginState extends State<Login> {
         String adminEmail = user.email ?? '';
 
         if (!doc.exists) {
-          // Pre-populate sample admin data
-          if (adminEmail == 'john@admin.edu') {
-            adminName = 'Prof. John Carter';
-          } else if (adminEmail == 'linda@admin.edu') {
-            adminName = 'Dr.Linda Matthews';
-          } else if (adminEmail == 'mike@admin.edu') {
-            adminName = 'Mike Johnson';
-          } else {
-            adminName = 'Unknown Admin';
-          }
+          adminName = 'New Admin';
 
           // Create admin document
           await docRef.set({'name': adminName, 'email': adminEmail});
