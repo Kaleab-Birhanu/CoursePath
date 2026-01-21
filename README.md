@@ -9,3 +9,6 @@ It's main features are:
   - letting admins to recieve the add and drop request, and allow them to assign students in classes.
   - displaying an alert notification when the add and drop deadline is near.
 
+Use alex@student.edu and maya@student.edu for student login 
+and john@admin.edu for admin login. Apply 12345678 password for all
+
